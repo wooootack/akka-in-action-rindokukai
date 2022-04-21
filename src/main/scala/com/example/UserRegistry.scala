@@ -3,13 +3,20 @@ package com.example
 //#user-registry-actor
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
+import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.scaladsl.Behaviors
+
 import scala.collection.immutable
 
 //#user-case-classes
 final case class User(name: String, age: Int, countryOfResidence: String)
 final case class Users(users: immutable.Seq[User])
 //#user-case-classes
+
+// こういう、class使った書き方じゃないんだな〜
+// class UserRegistry(context: ActorContext[UserRegistry.Command]) extends AbstractBehavior[UserRegistry.Command](context) {
+//   val users: List[User] = List[User].empty()
+// }
 
 object UserRegistry {
   // actor protocol
