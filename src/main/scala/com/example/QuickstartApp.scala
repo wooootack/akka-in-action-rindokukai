@@ -8,6 +8,13 @@ import akka.http.scaladsl.server.Route
 import scala.util.Failure
 import scala.util.Success
 
+// 機能一覧
+// 1. イベントの作成ができる
+//    POST /events/event_name { "ticket": 250 }
+// 2. 全イベントの取得ができる
+// 3. チケットの購入ができる
+// 4. イベントのキャンセルができる
+
 //#main-class
 object QuickstartApp {
   //#start-http-server
@@ -29,8 +36,8 @@ object QuickstartApp {
   def main(args: Array[String]): Unit = {
     //#server-bootstrapping
     val rootBehavior = Behaviors.setup[Nothing] { context =>
-      val userRegistryActor = context.spawn(UserRegistry(), "UserRegistryActor")
-      context.watch(userRegistryActor)
+//      val userRegistryActor = context.spawn(UserRegistry(), "UserRegistryActor")
+//      context.watch(userRegistryActor)
 
       val eventRegistryActor = context.spawn(EventRegistry(), "EventRegistryActor")
       context.watch(eventRegistryActor)

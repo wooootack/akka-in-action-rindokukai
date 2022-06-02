@@ -3,7 +3,7 @@ package com.example
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import com.example.EventRegistry.GetEvents
+import com.example.EventRegistry.{CreateEvent, GetEvents}
 
 import scala.concurrent.Future
 // import com.example.EventRegistry._
@@ -27,6 +27,9 @@ class EventRoutes(eventRegistry: ActorRef[EventRegistry.Command])(implicit val s
   def getEvents(): Future[Events] =
     eventRegistry.ask(GetEvents)
 
+  def createEvent(name: String): Future[String] =
+    eventRegistry.ask(replyTo => CreateEvent(name, replyTo))
+
   //#all-routes
   //#Events-get-post
   //#Events-get-delete
@@ -38,9 +41,16 @@ class EventRoutes(eventRegistry: ActorRef[EventRegistry.Command])(implicit val s
           concat(
             get {
               complete(getEvents())
-            })
+            },
+          )
+        },
+        path(Segment) { name =>
+          concat(
+            post {
+              complete(createEvent(name))
+            }
+          )
         })
-      //#Events-get-delete
     }
   //#all-routes
 }

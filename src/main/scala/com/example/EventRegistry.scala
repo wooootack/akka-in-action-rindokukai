@@ -12,6 +12,7 @@ final case class Events(events: immutable.Seq[Event])
 object EventRegistry {
   sealed trait Command
   final case class GetEvents(replyTo: ActorRef[Events]) extends Command
+  final case class CreateEvent(name: String, replyTo: ActorRef[String]) extends Command
 
   def apply(): Behavior[Command] = registry(Set.empty)
 
@@ -19,6 +20,10 @@ object EventRegistry {
     Behaviors.receiveMessage {
       case GetEvents(replyTo) =>
         replyTo ! Events(events.toSeq)
+        Behaviors.same
+
+      case CreateEvent(name, replyTo) =>
+        replyTo ! name
         Behaviors.same
     }
 }
