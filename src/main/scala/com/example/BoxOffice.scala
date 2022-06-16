@@ -16,11 +16,16 @@ class BoxOffice(context: ActorContext[BoxOffice.Command])
   import BoxOffice._
 
   def createTicketSeller(name: String) =
-    context.spawn()
+    context.spawn(TicketSeller(), name)
 
   override def onMessage(msg: BoxOffice.Command): Behavior[BoxOffice.Command] =
     msg match {
       case CreateEvent(name, tickets) =>
-
+        def create() = {
+          val eventTickets = createTicketSeller(name)
+          val newTickets = (1 to tickets).map { ticketId =>
+            TicketSeller.Ticket(ticketId)
+          }.toVector
+        }
     }
 }
