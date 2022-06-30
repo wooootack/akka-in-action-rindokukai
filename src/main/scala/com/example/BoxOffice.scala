@@ -1,13 +1,19 @@
 package com.example
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
+import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors} .Command
+
+import scala.collection.immutable
 
 
 object BoxOffice {
   sealed trait Command
 
-  case class CreateEvent(name: String, tickets: Int, replyTo) extends Command
+  case class CreateEvent(name: String, tickets: Int, replyTo: ActorRef[EventResponse]) extends Command
+  final case class GetEvents(replyTo: ActorRef[Events]) extends Command
+
+  final case class Event(name: String, tickets: Int)
+  final case class Events(events: immutable.Seq[Event])
 
   sealed trait EventResponse
   case class EventCreated(event: Event) extends EventResponse
@@ -30,7 +36,10 @@ class BoxOffice(context: ActorContext[BoxOffice.Command])
           val newTickets = (1 to tickets).map { ticketId =>
             TicketSeller.Ticket(ticketId)
           }.toVector
+          eventTickets ! TicketSeller.Add(newTickets)
+          replyTo ! EventCreated(Event(name, tickets))
         }
-        context.child(name).fold(create()).(_ => replyTo ! )
+        context.child(name).fold(create())(_ => replyTo ! EventExists)
+        Behaviors.same
     }
 }

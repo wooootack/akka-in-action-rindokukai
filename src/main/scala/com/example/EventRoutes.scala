@@ -3,7 +3,7 @@ package com.example
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import com.example.EventRegistry.{CreateEvent, GetEvents}
+import com.example.BoxOffice._
 
 import scala.concurrent.Future
 // import com.example.EventRegistry._
@@ -14,7 +14,7 @@ import akka.util.Timeout
 
 //#import-json-formats
 //#Event-routes-class
-class EventRoutes(eventRegistry: ActorRef[EventRegistry.Command])(implicit val system: ActorSystem[_]) {
+class EventRoutes(boxOffice: ActorRef[BoxOffice.Command])(implicit val system: ActorSystem[_]) {
 
   //#Event-routes-class
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -25,10 +25,10 @@ class EventRoutes(eventRegistry: ActorRef[EventRegistry.Command])(implicit val s
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
   def getEvents(): Future[Events] =
-    eventRegistry.ask(GetEvents)
+    boxOffice.ask(GetEvents)
 
-  def createEvent(name: String): Future[String] =
-    eventRegistry.ask(replyTo => CreateEvent(name, replyTo))
+  def createEvent(name: String, tickets: Int): Future[EventResponse] =
+    boxOffice.ask(replyTo => CreateEvent(name, tickets, replyTo))
 
   //#all-routes
   //#Events-get-post
@@ -44,7 +44,7 @@ class EventRoutes(eventRegistry: ActorRef[EventRegistry.Command])(implicit val s
             },
           )
         },
-        path(Segment) { name =>
+        path(Segments) { name =>
           concat(
             post {
               complete(createEvent(name))
